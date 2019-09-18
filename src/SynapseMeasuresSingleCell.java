@@ -415,33 +415,27 @@ public class SynapseMeasuresSingleCell extends JFrame implements
 		reset();
 		img = WindowManager.getCurrentImage();
 		final boolean v139t = IJ.getVersion().compareTo("1.39t") >= 0;
-		boolean isGray = false;
 		if (img == null) {
 			 IJ.noImage();
-		} else if (img.getBitDepth() ==8 ) {
-			isGray = true;
-			IJ.showMessage("It is needed a RGB image");
 		} else if (img.getStackSize() == 1) {
 			ImageProcessor ip = img.getProcessor();
 			ip.resetRoi();
-			if (keepOriginal) ip = ip.crop();
+			ip = ip.crop();
 			counterImg = new ImagePlus("Counter Window - " + img.getTitle(), ip);
-			
-			@SuppressWarnings("unchecked")
-			final Overlay overlay =
+			Overlay overlay =
 				v139t ? img.getCanvas().getOverlay() : null;
 			ic = new SynapseMeasuresSingleCellCntrImageCanvas(counterImg, typeVector, this, overlay);
 			new ImageWindow(counterImg, ic);
 			
 		} else if (img.getStackSize() > 1) {
-			final ImageStack stack = img.getStack();
-			final int size = stack.getSize();
-			final ImageStack counterStack = img.createEmptyStack();
+			ImageStack stack = img.getStack();
+			int size = stack.getSize();
+			ImageStack counterStack = img.createEmptyStack();
 			for (int i = 1; i <= size; i++) {
 				ImageProcessor ip = stack.getProcessor(i);
-				if (keepOriginal) ip = ip.crop();
+				ip.resetRoi();
+				ip = ip.crop();
 				counterStack.addSlice(stack.getSliceLabel(i), ip);
-				
 			}
 			counterImg = new ImagePlus("Counter Window - " + img.getTitle(),
 					counterStack);
@@ -453,7 +447,6 @@ public class SynapseMeasuresSingleCell extends JFrame implements
 				((CompositeImage) counterImg).copyLuts(img);
 			}
 			counterImg.setOpenAsHyperStack(img.isHyperStack());
-			@SuppressWarnings("unchecked")
 			Overlay overlay = v139t ? img.getCanvas().getOverlay() : null;
 			ic = new SynapseMeasuresSingleCellCntrImageCanvas(counterImg, typeVector, this, overlay);	
 			new StackWindow(counterImg, ic);
